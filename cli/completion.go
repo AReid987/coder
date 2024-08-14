@@ -14,7 +14,7 @@ func (*RootCmd) completion() *serpent.Command {
 	shellOptions := completion.ShellOptions(&shellName)
 	return &serpent.Command{
 		Use:   "completion",
-		Short: "Install shell completion scripts for the detected shell.",
+		Short: "Install or update shell completion scripts for the detected shell.",
 		Options: []serpent.Option{
 			{
 				Flag:          "shell",
@@ -67,12 +67,8 @@ func (*RootCmd) completion() *serpent.Command {
 func installCompletion(inv *serpent.Invocation, shell completion.Shell) error {
 	path, err := shell.InstallPath()
 	if err != nil {
-		// If we can't determine the install path, just print the completion script.
+		cliui.Error(inv.Stderr, fmt.Sprintf("Failed to determine completion path %v", err))
 		return shell.WriteCompletion(inv.Stdout)
-	}
-	action := "appending to"
-	if shell.UsesOwnFile() {
-		action = "creating"
 	}
 	choice, err := cliui.Select(inv, cliui.SelectOptions{
 		Options: []string{
@@ -80,7 +76,7 @@ func installCompletion(inv *serpent.Invocation, shell completion.Shell) error {
 			"Print to terminal",
 			"Cancel",
 		},
-		Message:    fmt.Sprintf("Install completion for %s by %s %s?", shell.Name(), action, path),
+		Message:    fmt.Sprintf("Install completion for %s at %s?", shell.Name(), path),
 		HideSearch: true,
 	})
 	if err != nil {
