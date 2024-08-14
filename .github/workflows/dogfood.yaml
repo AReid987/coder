@@ -87,7 +87,7 @@ jobs:
 
       - name: Terraform init and validate
         run: |
-          cd dogfood
+          cd dogfood/contents
           terraform init -upgrade
           terraform validate
 
@@ -101,16 +101,10 @@ jobs:
         id: message
         run: echo "pr_title=$(git log --format=%s -n 1 ${{ github.sha }})" >> $GITHUB_OUTPUT
 
-      - name: "Get latest Coder binary from the server"
-        if: github.ref == 'refs/heads/main'
-        run: |
-          curl -fsSL "https://dev.coder.com/bin/coder-linux-amd64" -o "./coder"
-          chmod +x "./coder"
-
       - name: "Push template"
         if: github.ref == 'refs/heads/main'
         run: |
-          ./coder templates push $CODER_TEMPLATE_NAME --directory $CODER_TEMPLATE_DIR --yes --name=$CODER_TEMPLATE_VERSION --message="$CODER_TEMPLATE_MESSAGE"
+          terraform apply -auto-approve
         env:
           # Consumed by Coder CLI
           CODER_URL: https://dev.coder.com
