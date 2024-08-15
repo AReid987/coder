@@ -1,0 +1,20 @@
+name: release-validation
+
+on:
+  push:
+    tags:
+      - "v*"
+    branches: 08-15-ci_add_networking_release_validation
+
+jobs:
+  network-performance:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run Schmoder CI
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: coder/schmoder
+          event-type: cut-release
+          client-payload: '{ "num_releases": "3", "commit": "${{ github.sha }}" }'
